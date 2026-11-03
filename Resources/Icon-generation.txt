@@ -1,0 +1,14 @@
+Source: app logo.png
+Method: built-in image_gen tool, transparent background enabled.
+Request: Remove only the opaque black exterior outside the white rounded-square tile;
+preserve the white tile, blue linked-loop symbol, green status dot, colors and layout.
+Preserve opaque white inside the tile and both loops. Use smooth transparent corners,
+without black halos, text, shadows, or new elements.
+
+The selected tool output is saved as AppIconArtwork.png. scripts/make-icon.swift applies
+a clean native rounded silhouette when packaging the ten macOS icon representations.
+
+Final clean transparent PNG: Resources/AppIcon.png
+
+Full built-in edit prompt:
+Use case: background-extraction. Asset type: final macOS app icon PNG with real alpha transparency. Edit target: the provided local app logo.png. Primary request: REMOVE ONLY the opaque black outer square background outside the white rounded-square tile and replace that outer background with 100% transparent alpha. Preserve the existing opaque white rounded-square tile, existing blue infinity/link mark, and green circular status dot, matching the input artwork, shapes, color, stroke widths, layout and proportions exactly. The tile is white and must remain opaque, including the white inside both blue loops. Keep the existing ~5% canvas margins, round corners, and square canvas; smooth antialiased silhouette with no black halo. No redesign, no new elements, no new shadows, no text, no frame, no checkered pattern baked into pixels. Output the same icon as a transparent-background PNG; only the black exterior is removed.

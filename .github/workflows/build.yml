@@ -1,0 +1,35 @@
+name: Build and check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Check core behavior
+        run: ./scripts/test.sh
+      - name: Build Universal installer
+        run: ./scripts/release.sh
+      - name: Verify both native architectures and signature
+        run: |
+          xcrun lipo build/HotSpotAlive.app/Contents/MacOS/HotSpotAlive -verify_arch x86_64 arm64
+          codesign --verify --strict build/HotSpotAlive.app
+          hdiutil verify build/release/HotSpotAlive-*-Universal.dmg
+      - name: Save installable artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: HotSpotAlive-macOS-Universal
+          path: build/release/*
+          if-no-files-found: error
+          retention-days: 14

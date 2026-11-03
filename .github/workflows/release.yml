@@ -1,0 +1,41 @@
+name: Publish release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Verify version tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)
+          test "$RELEASE_TAG" = "v$version"
+      - name: Test and package
+        run: |
+          ./scripts/test.sh
+          ./scripts/release.sh
+          xcrun lipo build/HotSpotAlive.app/Contents/MacOS/HotSpotAlive -verify_arch x86_64 arm64
+          codesign --verify --strict build/HotSpotAlive.app
+          hdiutil verify build/release/HotSpotAlive-*-Universal.dmg
+      - name: Publish installer and source assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" build/release/* --verify-tag --draft \
+            --title "HotSpotAlive ${RELEASE_TAG#v}" --notes-file docs/RELEASE_NOTES.md
+          gh release edit "$RELEASE_TAG" --draft=false
